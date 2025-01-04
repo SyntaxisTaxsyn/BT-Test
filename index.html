@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bluetooth Beacon Distance</title>
+  <title>Bluetooth Device Distance</title>
 </head>
 <body>
-  <h1>Bluetooth Beacon Distance Estimation</h1>
-  <button id="scan-button">Scan for Beacons</button>
-  <ul id="beacon-list"></ul>
+  <h1>Bluetooth Device Distance Estimation</h1>
+  <button id="scan-button">Scan for Devices</button>
+  <ul id="device-list"></ul>
 
   <script>
-    // Constants for RSSI to distance calculation
-    const RSSI_AT_ONE_METER = -59; // Example RSSI value at 1 meter (check your beacon specs)
-    const ENVIRONMENTAL_FACTOR = 2; // Example environmental attenuation factor
+    // Constants for distance estimation
+    const RSSI_AT_ONE_METER = -59; // Example RSSI at 1 meter (check your device specs)
+    const ENVIRONMENTAL_FACTOR = 2; // Environmental attenuation factor
 
     // Function to estimate distance based on RSSI
     function estimateDistance(rssi) {
@@ -21,39 +21,42 @@
     }
 
     // Scan for Bluetooth devices
-    async function scanForBeacons() {
+    async function scanForDevices() {
       try {
+        // Request a Bluetooth device
         const options = {
-          acceptAllAdvertisements: true // Scan for all nearby BLE devices
+          acceptAllDevices: true, // Scan for all nearby devices
+          optionalServices: [] // Optional services can be added if needed
         };
 
         console.log('Requesting Bluetooth device...');
-        const device = await navigator.bluetooth.requestLEScan(options);
+        const device = await navigator.bluetooth.requestDevice(options);
 
-        console.log('Scanning for Bluetooth devices...');
+        console.log(`Device found: ${device.name || 'Unnamed Device'}`);
 
-        navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
-          const { rssi, name } = event;
-          if (name) {
-            const distance = estimateDistance(rssi).toFixed(2); // Estimate distance
-            console.log(`Found beacon: ${name}, RSSI: ${rssi}, Distance: ~${distance} meters`);
+        // Display device information
+        const deviceList = document.getElementById('device-list');
+        const listItem = document.createElement('li');
+        listItem.textContent = `Device: ${device.name || 'Unnamed'}, ID: ${device.id}`;
+        deviceList.appendChild(listItem);
 
-            // Update the UI
-            const beaconList = document.getElementById('beacon-list');
-            const listItem = document.createElement('li');
-            listItem.textContent = `Beacon: ${name}, RSSI: ${rssi}, Distance: ~${distance} meters`;
-            beaconList.appendChild(listItem);
-          }
-        });
+        // Check if RSSI is available
+        if (device.rssi !== undefined) {
+          const distance = estimateDistance(device.rssi).toFixed(2);
+          console.log(`RSSI: ${device.rssi}, Estimated Distance: ~${distance} meters`);
+          listItem.textContent += `, RSSI: ${device.rssi}, Distance: ~${distance} meters`;
+        } else {
+          console.log('RSSI is not available for this device.');
+        }
       } catch (error) {
-        console.error('Error scanning for beacons:', error);
-        alert('Error scanning for beacons: ' + error.message);
+        console.error('Error scanning for devices:', error);
+        alert('Error scanning for devices: ' + error.message);
       }
     }
 
     // Add event listener to the button
     const scanButton = document.getElementById('scan-button');
-    scanButton.addEventListener('click', scanForBeacons);
+    scanButton.addEventListener('click', scanForDevices);
   </script>
 </body>
 </html>
