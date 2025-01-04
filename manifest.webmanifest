@@ -1,0 +1,17 @@
+{
+  "name": "BT-Test",
+  "short_name": "BT-Test",
+  "description": "Bluetooth test PWA application",
+  "scope": "/BT-Test/",
+  "start_url": "/BT-Test/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone", 
+  "icons": [
+      {
+        "src": "/BT-Test/img/IMG_0885.jpeg",
+        "type": "image/jpeg",
+        "sizes": "1165x1319"
+      }
+  ]
+}
