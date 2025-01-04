@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bluetooth Beacon Distance</title>
+</head>
+<body>
+  <h1>Bluetooth Beacon Distance Estimation</h1>
+  <button id="scan-button">Scan for Beacons</button>
+  <ul id="beacon-list"></ul>
+
+  <script>
+    // Constants for RSSI to distance calculation
+    const RSSI_AT_ONE_METER = -59; // Example RSSI value at 1 meter (check your beacon specs)
+    const ENVIRONMENTAL_FACTOR = 2; // Example environmental attenuation factor
+
+    // Function to estimate distance based on RSSI
+    function estimateDistance(rssi) {
+      return Math.pow(10, (RSSI_AT_ONE_METER - rssi) / (10 * ENVIRONMENTAL_FACTOR));
+    }
+
+    // Scan for Bluetooth devices
+    async function scanForBeacons() {
+      try {
+        const options = {
+          acceptAllAdvertisements: true // Scan for all nearby BLE devices
+        };
+
+        console.log('Requesting Bluetooth device...');
+        const device = await navigator.bluetooth.requestLEScan(options);
+
+        console.log('Scanning for Bluetooth devices...');
+
+        navigator.bluetooth.addEventListener('advertisementreceived', (event) => {
+          const { rssi, name } = event;
+          if (name) {
+            const distance = estimateDistance(rssi).toFixed(2); // Estimate distance
+            console.log(`Found beacon: ${name}, RSSI: ${rssi}, Distance: ~${distance} meters`);
+
+            // Update the UI
+            const beaconList = document.getElementById('beacon-list');
+            const listItem = document.createElement('li');
+            listItem.textContent = `Beacon: ${name}, RSSI: ${rssi}, Distance: ~${distance} meters`;
+            beaconList.appendChild(listItem);
+          }
+        });
+      } catch (error) {
+        console.error('Error scanning for beacons:', error);
+        alert('Error scanning for beacons: ' + error.message);
+      }
+    }
+
+    // Add event listener to the button
+    const scanButton = document.getElementById('scan-button');
+    scanButton.addEventListener('click', scanForBeacons);
+  </script>
+</body>
+</html>
